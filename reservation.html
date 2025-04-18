@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book a Table - Akay Cafe and Restaurant</title>
+    <style>
+      /* Basic Reset */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        padding-top: 40px; /* Match navbar height */
+      }
+
+      /* Header and Navigation Styles */
+      header nav {
+        width: 100%;
+        background-color: rgba(19, 2, 2, 0.906);
+        z-index: 20;
+        height: 60px; /* Navbar height */
+        position: fixed;
+        top: 0;
+        left: 0;
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
+      }
+
+      .logo-name {
+        height: 30px; /* Logo height */
+        line-height: 30px;
+        color: aliceblue;
+        text-decoration: none;
+        font-size: 24px; /* Adjusted for better proportion */
+      }
+
+      .navigation-bar {
+        margin-left: auto;
+      }
+
+      .navigation-bar ul {
+        display: flex;
+        list-style: none;
+      }
+
+      .navigation-bar ul li {
+        margin: 0 10px;
+      }
+
+      .navigation-bar a {
+        color: #fff;
+        text-decoration: none;
+        font-size: 16px;
+      }
+
+      /* Form Container */
+      .reservation-form-container {
+        max-width: 600px;
+        margin: 60px auto;
+        padding: 30px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Form Elements */
+      .reservation-form-container input,
+      .reservation-form-container textarea {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+
+      .reservation-form-container button {
+        width: 100%;
+        padding: 10px;
+        background-color: #333;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .status-message {
+        margin-top: 15px;
+        padding: 10px;
+        border-radius: 4px;
+        display: none;
+      }
+
+      .status-message.success {
+        background-color: #d4edda;
+        color: #155724;
+      }
+
+      .status-message.error {
+        background-color: #f8d7da;
+        color: #721c24;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Your header with navigation -->
+    <header>
+      <nav>
+        <div class="logo">
+          <h2 class="logo-name">Akay Cafe and Restaurant</h2>
+        </div>
+        <div class="navigation-bar">
+          <ul>
+            <li class="active">
+              <a href="main.html" style="font-size: 20px"
+                >Home<span class="underline"></span
+              ></a>
+            </li>
+            <li>
+              <a href="#" style="font-size: 20px"
+                >Reservations<span class="underline"></span
+              ></a>
+            </li>
+            <li>
+              <a href="menu.html" style="font-size: 20px"
+                >Menu<span class="underline"></span
+              ></a>
+            </li>
+            <li>
+              <a href="feedback.html" style="font-size: 20px"
+                >Feedback<span class="underline"></span
+              ></a>
+            </li>
+            <li>
+              <a href="contact.html" style="font-size: 20px"
+                >Contact<span class="underline"></span
+              ></a>
+            </li>
+
+            <li id="login-link"><a href="login.html">LogIn</a></li>
+            <li id="logout-link" style="display: none">
+              <a href="#">Logout</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Your reservation form container -->
+    <div class="reservation-form-container">
+      <h2>Book Your Table</h2>
+      <form id="reservationForm">
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date" required />
+
+        <label for="time">Time:</label>
+        <input type="time" id="time" name="time" required />
+
+        <label for="guests">Number of Guests:</label>
+        <input type="number" id="guests" name="guests" min="1" required />
+
+        <label for="requests">Special Requests:</label>
+        <textarea id="requests" name="requests"></textarea>
+
+        <button type="submit">Book Table</button>
+      </form>
+      <div id="statusMessage" class="status-message"></div>
+    </div>
+
+    <!-- Your scripts -->
+    <script src="maain.js"></script>
+    <script>
+      // Function to check if user is logged in
+      function checkAuthStatus() {
+        fetch("check_auth.php")
+          .then((response) => response.json())
+          .then((data) => {
+            const loginLink = document.getElementById("login-link");
+            const logoutLink = document.getElementById("logout-link");
+
+            if (data.authenticated) {
+              // User is logged in - show logout link, hide login link
+              loginLink.style.display = "none";
+              logoutLink.style.display = "block";
+              // Add a greeting with the user's name
+              if (data.user_name) {
+                logoutLink.querySelector("a").innerHTML =
+                  "Logout (" + data.user_name + ")";
+
+                // User data will be sent from session
+              }
+            } else {
+              // User is not logged in - show login link, hide logout link
+              loginLink.style.display = "block";
+              logoutLink.style.display = "none";
+            }
+          })
+          .catch((error) => {
+            console.error("Error checking authentication status:", error);
+          });
+      }
+
+      // Ensure the tables are set up when the page loads
+      function setupTables() {
+        return fetch("admin/setup_tables.php")
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(
+                "Server returned " + response.status + " " + response.statusText
+              );
+            }
+            return response.text(); // Get response as text first
+          })
+          .then((text) => {
+            try {
+              // Try to parse as JSON
+              const data = JSON.parse(text);
+              console.log("Tables setup:", data.message);
+              return data;
+            } catch (e) {
+              // If parsing fails, log the actual response
+              console.error("Failed to parse JSON response:", text);
+              throw new Error("Invalid JSON response from server");
+            }
+          })
+          .catch((error) => {
+            console.error("Error setting up tables:", error);
+            // Return a default response to continue execution
+            return {
+              status: "error",
+              message: "Error setting up tables: " + error.message,
+            };
+          });
+      }
+
+      // Add event listener to logout link
+      document.addEventListener("DOMContentLoaded", function () {
+        checkAuthStatus();
+        setupTables(); // Run the table setup when the page loads
+
+        // Set today's date as the minimum date for the date input
+        const today = new Date().toISOString().split("T")[0];
+        document.getElementById("date").min = today;
+
+        // Add event listener to logout link
+        const logoutLink = document.getElementById("logout-link");
+        if (logoutLink) {
+          logoutLink.addEventListener("click", function (e) {
+            e.preventDefault();
+            window.location.href = "logout.php";
+          });
+        }
+      });
+
+      // Add specific JS for reservation form submission
+      const reservationForm = document.getElementById("reservationForm");
+      if (reservationForm) {
+        reservationForm.addEventListener("submit", function (event) {
+          event.preventDefault(); // Prevent default form submission
+
+          // First check if user is logged in
+          fetch("check_auth.php")
+            .then((response) => response.json())
+            .then((data) => {
+              if (!data.authenticated) {
+                alert(
+                  "You must be logged in to make a reservation. Redirecting to login page..."
+                );
+                window.location.href = "login.html";
+                return;
+              }
+
+              // Ensure tables are set up before submitting the reservation
+              setupTables().then(() => {
+                // If user is authenticated and tables are set up, proceed with form submission
+                // User name and email will be handled in backend from session
+                const formData = new FormData(reservationForm);
+                const statusMessage = document.getElementById("statusMessage");
+
+                // Use an absolute path to ensure the file is found
+                fetch("book_table.php", {
+                  method: "POST",
+                  body: formData,
+                })
+                  .then((response) => {
+                    console.log("Response status:", response.status);
+                    console.log("Response headers:", response.headers);
+                    return response.text().then((text) => {
+                      console.log("Raw response:", text);
+                      try {
+                        return JSON.parse(text);
+                      } catch (e) {
+                        console.error("Error parsing JSON:", e);
+                        throw new Error("Invalid JSON response");
+                      }
+                    });
+                  })
+                  .then((data) => {
+                    statusMessage.style.display = "block"; // Show status message
+                    statusMessage.textContent = data.message;
+                    if (data.status === "success") {
+                      statusMessage.className = "status-message success";
+                      reservationForm.reset(); // Clear the form on success
+
+                      // Set today's date as the minimum date for the date input again after form reset
+                      const today = new Date().toISOString().split("T")[0];
+                      document.getElementById("date").min = today;
+                    } else {
+                      statusMessage.className = "status-message error";
+                    }
+                  })
+                  .catch((error) => {
+                    console.error("Error submitting reservation:", error);
+                    statusMessage.style.display = "block";
+                    statusMessage.className = "status-message error";
+                    statusMessage.textContent =
+                      "An error occurred. Please try again later.";
+                  });
+              });
+            })
+            .catch((error) => {
+              console.error("Error checking authentication:", error);
+              const statusMessage = document.getElementById("statusMessage");
+              statusMessage.style.display = "block";
+              statusMessage.className = "status-message error";
+              statusMessage.textContent =
+                "Error checking authentication. Please try again.";
+            });
+        });
+      }
+    </script>
+  </body>
+</html>
