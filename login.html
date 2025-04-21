@@ -12,8 +12,8 @@
     <!-- Navigation -->
     <nav class="bg-gray-900 p-4">
         <div class="container mx-auto flex justify-between items-center">
-            <a href="main.html" class="text-white text-4xl font-['Herr_Von_Muellerhoff']">Platinum Hotel</a>
-            <a href="main.html" class="text-white hover:text-gray-300 transition duration-300">Back to Home</a>
+            <a href="index.html" class="text-white text-4xl font-['Herr_Von_Muellerhoff']">Platinum Hotel</a>
+            <a href="index.html" class="text-white hover:text-gray-300 transition duration-300">Back to Home</a>
         </div>
     </nav>
 
@@ -159,7 +159,7 @@
                 if (data.status === 'success') {
                     showMessage(messageDiv, 'Login successful! Redirecting...', false);
                     setTimeout(() => {
-                        window.location.href = 'main.html';
+                        window.location.href = 'index.html';
                     }, 1500);
                 } else {
                     showMessage(messageDiv, data.message, true);
@@ -202,7 +202,7 @@
                 if (data.status === 'success') {
                     showMessage(messageDiv, 'Registration successful! Redirecting...', false);
                     setTimeout(() => {
-                        window.location.href = 'main.html';
+                        window.location.href = 'index.html';
                     }, 1500);
                 } else {
                     showMessage(messageDiv, data.message, true);
